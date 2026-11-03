@@ -404,7 +404,7 @@ function dayKeyOf(d){var m=String(d||"").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
 function fuzzyFind(ms,r,used){var dr=dayKeyOf(r.d),c=ms.filter(function(m){if(used&&used.indexOf(m)>=0)return false;var dm=dayKeyOf(m.d);if(dr&&dm&&dr!==dm)return false;return sameTeam(m.home,r.home)||sameTeam(m.away,r.away)});return c.length===1?c[0]:null}
 function num(x){var v=typeof x==="number"?x:parseFloat(x);return isFinite(v)?v:null}
 function imp(p){return p>0?Math.round(10000/p)/100:null}
-function save(){try{S.ts=Date.now();localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(window.dbQueue)dbQueue()}
+function save(){try{S.ts=Date.now();localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!save.warned){save.warned=1;setTimeout(function(){toast("El navegador no tiene más espacio: los últimos cambios no se guardaron. Borra algún evento antiguo para liberar espacio.")},0)}}if(window.dbQueue)dbQueue()}
 function deriveSV(){var ch=false;(S.events||[]).forEach(function(ev){(ev.matches||[]).forEach(function(m){
   [["sv",["bt","ou"]],["vb",["bt","ou"]]].forEach(function(q){var v=m&&m.src&&m.src[q[0]];if(!v||!v.cs||!v.cs.items||!v.cs.items[0])return;var sc=norm1(v.cs.items[0].l);
     q[1].forEach(function(k){if(v[k])return;var d=k==="bt"?btFromScore(sc):ouFromScore(sc);if(d){v[k]=d;ch=true}})})})});if(ch)save();return ch}
@@ -1559,9 +1559,15 @@ $("hReset").onclick=function(){if(!armed(this,"¿Seguro? Pulsa otra vez"))return
 /* ---------- Emparejado de nombres equipo del partido <-> historial ---------- */
 function tk(s){return String(s||"").replace(/[øØ]/g,"o").replace(/[łŁ]/g,"l").replace(/[đĐ]/g,"d").replace(/æ/gi,"ae").replace(/œ/gi,"oe").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").split(" ").filter(function(w){return w&&["fc","cf","sc","ac","fk","sk","afc","bsc","club","de","the"].indexOf(w)<0})}
 function tEq(a,b){if(a===b)return true;var s=a.length<b.length?a:b,l=s===a?b:a;return s.length>=6&&l.length-s.length<=3&&l.indexOf(s)===0}
-function tFuzzy(a,b){var x=tk(a),y=tk(b);if(!x.length||!y.length)return false;var s=x.length<=y.length?x:y,l=s===x?y:x;return s.every(function(w){return l.some(function(v){return tEq(w,v)})})}
-function histTeams(){var o={};((S.hist&&S.hist.rows)||[]).forEach(function(r){o[r.home]=1;o[r.away]=1});return Object.keys(o)}
-function histName(team){var hs=histTeams();if(S.tmap&&S.tmap[team]&&hs.indexOf(S.tmap[team])>=0)return S.tmap[team];if(hs.indexOf(team)>=0)return team;
+var TKC=new Map();function tkc(s){s=String(s||"");var v=TKC.get(s);if(!v){v=tk(s);TKC.set(s,v)}return v}
+function tFuzzy(a,b){var x=tkc(a),y=tkc(b);if(!x.length||!y.length)return false;var s=x.length<=y.length?x:y,l=s===x?y:x;return s.every(function(w){return l.some(function(v){return tEq(w,v)})})}
+var HTC={rows:null,n:-1,v:[]};
+function histTeams(){var rows=(S.hist&&S.hist.rows)||[];if(HTC.rows!==rows||HTC.n!==rows.length){var o={};rows.forEach(function(r){o[r.home]=1;o[r.away]=1});HTC={rows:rows,n:rows.length,v:Object.keys(o)}}return HTC.v.slice()}
+var HNC={sig:"",m:new Map()};
+function histName(team){var hs=histTeams(),sig=hs.join("\u0001")+"\u0002"+JSON.stringify(S.tmap||{});
+  if(HNC.sig!==sig)HNC={sig:sig,m:new Map()};if(HNC.m.has(team))return HNC.m.get(team);
+  var r=histNameRaw(team,hs);HNC.m.set(team,r);return r}
+function histNameRaw(team,hs){if(S.tmap&&S.tmap[team]&&hs.indexOf(S.tmap[team])>=0)return S.tmap[team];if(hs.indexOf(team)>=0)return team;
   var c=hs.filter(function(n){return tmEq(team,n)});if(c.length===1)return c[0];
   c=hs.filter(function(n){return tFuzzy(team,n)});return c.length===1?c[0]:null}
 function seedHist(){if(S.histOff||(S.hist&&S.hist.rows&&S.hist.rows.length))return;try{var e=JSON.parse($("embeddedState").textContent||"null");if(e&&e.hist&&e.hist.rows&&e.hist.rows.length){S.hist=e.hist;save()}}catch(x){}}
