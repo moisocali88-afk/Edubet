@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark" style="color-scheme: light;">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UEFA_Edubet22 · Cloud</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f3f5f2;--surface:#fff;--surface2:#edf1ed;--ink:#17241d;--ink2:#59675f;--ink3:#849087;--line:#dce4dd;--line2:#c4d0c7;--best-bg:#d9f0e0;--best-ink:#0f5a2e;--accent:#174b35;--accent-ink:#fff;--warn:#8a5a0a;--bad:#b3261e;--focus:#2c8b5c}
+:root[data-theme="dark"]{--bg:#101713;--surface:#18211b;--surface2:#202b24;--ink:#e8efe9;--ink2:#a9b7ac;--ink3:#7e8c82;--line:#2d3b32;--line2:#405146;--best-bg:#1d4a2e;--best-ink:#aee9c3;--accent:#a5d9b7;--accent-ink:#102016;--warn:#e0b35a;--bad:#f2928b;--focus:#74d49a}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#101713;--surface:#18211b;--surface2:#202b24;--ink:#e8efe9;--ink2:#a9b7ac;--ink3:#7e8c82;--line:#2d3b32;--line2:#405146;--best-bg:#1d4a2e;--best-ink:#aee9c3;--accent:#a5d9b7;--accent-ink:#102016;--warn:#e0b35a;--bad:#f2928b;--focus:#74d49a}}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(12px)}
+body{margin:0;padding-bottom:56px;background:var(--bg);color:var(--ink);font:13px/1.42 "Bahnschrift Condensed","Bahnschrift","Arial Narrow","Roboto Condensed",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#zoomStage{zoom:1}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:9px 18px}
+.bar{max-width:1380px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+h1{font-size:19px;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin:0}.sub0{font-size:12.5px;color:var(--ink2);margin:2px 0 0}
+.actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.actions label{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink2)}
+#cpanel{position:fixed;z-index:40;width:min(340px,calc(100vw - 16px));max-height:min(70vh,560px);min-width:240px;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);border:1px solid var(--line2);border-radius:8px;box-shadow:0 10px 32px rgba(0,0,0,.28)}
+#cpanel[hidden]{display:none}
+.cp-h{display:flex;align-items:center;gap:8px;padding:7px 8px 7px 12px;cursor:grab;touch-action:none;user-select:none;border-bottom:1px solid var(--line);background:var(--surface2);border-radius:8px 8px 0 0}
+.cp-h.drag{cursor:grabbing}.cp-h b{flex:1;font-size:13px}.cp-x{border:1px solid var(--line2);background:var(--surface);border-radius:5px;width:26px;height:26px;font-size:15px;line-height:1}
+.cp-tabs{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.cp-tabs button{flex:1;border:1px solid var(--line2);background:var(--surface);border-radius:5px;padding:5px 0;font-size:12.5px;font-weight:700}
+.cp-tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cp-b{flex:1 1 auto;min-height:0;overflow:auto;padding:4px 10px 10px;font-size:12.5px}
+.cp-rs{position:absolute;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;touch-action:none;border-radius:0 0 8px 0;background:linear-gradient(135deg,transparent 0 52%,var(--ink3) 52% 60%,transparent 60% 72%,var(--ink3) 72% 80%,transparent 80%)}
+.cp-d{margin:9px 0 3px;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+.cp-r{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line)}
+.cp-r .t{color:var(--ink3);min-width:34px;font-variant-numeric:tabular-nums}.cp-r .n{flex:1;min-width:0}.cp-r .c{text-align:right}.cp-r .c .it{display:inline-block;margin:0 0 0 4px;vertical-align:middle}
+
+.it.pk.hit{background:#1e8e4f;color:#fff;border-color:#1e8e4f;font-weight:700}.it.pk.hit .od,.it.pk.hit .od.best{background:transparent;color:#fff;font-weight:700;opacity:1}.it.pk.miss .od,.it.pk.miss .od.best{background:transparent;color:var(--bad);font-weight:700}.it.pk.hit::before{content:"\2713\00a0"}
+.it.pk.hit.ex{background:#0e6a35;border-color:#0e6a35}
+.it.pk.miss{background:color-mix(in srgb,var(--bad) 13%,var(--surface));border-color:var(--bad);color:var(--bad);font-weight:700}.it.pk.miss::before{content:"\2717\00a0"}
+.cons.miss{background:color-mix(in srgb,var(--bad) 13%,var(--surface));color:var(--bad);border-radius:4px;padding:1px 6px;font-weight:700}.cons.miss small{color:var(--bad)}.cons.miss::before{content:"\2717\00a0"}
+.cons.hit{background:#1e8e4f;color:#fff;border-radius:4px;padding:1px 6px;font-weight:700}.cons.hit small{color:#fff}.cons.hit::before{content:"\2713\00a0"}
+.it.qt{border-color:var(--line2);background:var(--surface2);font-weight:500}.it.qo::before{content:none!important}
+.fm{display:inline-flex;gap:2px;flex:none}
+.daysort{margin-left:6px}
+.nl{display:flex;align-items:center;gap:9px;min-height:32px;flex-wrap:wrap}.nt{font-size:15px;line-height:1.3}
+.fm .p{width:16px;height:16px;font-size:10.5px}
+.ap{display:inline-block;font-size:11px;font-weight:700;padding:1px 9px;border-radius:10px;background:var(--surface2);border:1px solid var(--line2);color:var(--ink);margin-right:5px;line-height:1.4}
+.fm .p{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;font-size:10.5px;font-weight:700;color:#fff;line-height:1}
+.fm .W{background:#1e8e4f}.fm .D{background:#c9822b}.fm .L{background:#c0392b}.fm .p.last{outline:1.5px solid var(--ink);outline-offset:1px}
+@media(max-width:560px){.fm .p{width:10px;height:10px;font-size:0}}
+tr.real td{background:var(--surface2);font-weight:600;color:var(--ink)}
+.sc{font-weight:700;font-size:15px;padding:2px 9px;border-radius:5px;background:var(--ink);color:var(--bg);white-space:nowrap}.sc small{font-weight:600;font-size:11px;opacity:.75;margin-right:5px}.sc.ht{font-size:12.5px;background:var(--surface2);color:var(--ink2);border:1px solid var(--line2)}.sc.ht small{opacity:1}
+.chip.exct{background:#0e6a35;color:#fff;font-weight:700}
+.acc{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:7px;background:var(--surface);margin:0 0 10px;padding:6px 10px}
+.acc summary{cursor:pointer;font-weight:600;font-size:13.5px}.acc summary small{font-weight:400;color:var(--ink2)}
+.acc table{margin-top:6px}.acc td small{color:var(--ink2)}
+.cpill{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 9px;border-radius:10px;background:var(--surface2);border:1px solid var(--line2);color:var(--ink)}.cpill::before{content:"";display:inline-block;width:7px;height:10px;background:#f2c200;border-radius:1px;margin-right:6px;vertical-align:-1px}.cpill b{font-weight:800}
+.rpill::before{background:#d93025}.rpill{border-color:#d93025}.redtxt{color:#d93025}
+.btn{border:1px solid var(--line2);background:var(--surface);border-radius:5px;padding:5px 9px;font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--surface2);border-color:var(--ink3)}.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}.btn.pri:hover{opacity:.9;background:var(--accent)}
+.btn.danger{color:var(--bad)}.btn:disabled{opacity:.45;cursor:not-allowed}
+select,input[type=search],input.txt{border:1px solid var(--line2);border-radius:5px;padding:5px 8px;background:var(--surface);min-height:32px}
+main{max-width:1380px;margin:0 auto;padding:12px 18px 44px}
+.tally{padding:7px 10px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:5px;background:var(--surface);font-size:12.5px;color:var(--ink2);margin:0 0 10px}
+.empty{border:1px dashed var(--line2);border-radius:8px;padding:32px 18px;text-align:center;background:var(--surface)}
+.empty h2{font-size:15px;font-weight:700;margin:0 0 5px}.empty p{margin:0 auto 12px;max-width:52ch;color:var(--ink2)}
+.m{border:1px solid var(--line);border-radius:7px;background:var(--surface);margin-bottom:6px;overflow:hidden;box-shadow:0 1px 2px rgba(20,45,30,.035)}
+.mh{width:100%;display:flex;flex-wrap:wrap;gap:5px 10px;align-items:center;padding:7px 10px;border:0;background:transparent;text-align:left}
+.mh:hover{background:var(--surface2)}.mh svg{width:12px;height:12px;transition:transform .15s;flex:none}.m.open .mh svg{transform:rotate(90deg)}
+.mn{font-weight:700;flex:1 1 220px}.mn small{display:block;font-weight:400;font-size:11.5px;color:var(--ink3)}
+.chip{font-size:11.5px;font-weight:600;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--ink2)}
+.chip.ok{background:var(--best-bg);color:var(--best-ink)}.chip.dif{color:var(--warn)}
+.mb{display:none;border-top:1px solid var(--line)}.m.open .mb{display:block}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{padding:6px 8px;text-align:left;vertical-align:top;border-top:1px solid var(--line)}
+thead th{border-top:0;background:var(--surface2);font-size:12.5px;font-weight:700;color:var(--ink2)}.xo{margin:10px 14px 4px;border:1px solid var(--line,#d8dce3);border-radius:8px}.xo>summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:13px;color:var(--ink2)}.xo>summary small{font-weight:500;opacity:.8}.xg{padding:2px 12px 10px;display:grid;gap:6px}.xr{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:8px;align-items:center;font-size:12.5px}.xt{color:var(--ink2);font-weight:600}.xi{display:flex;flex-wrap:wrap;gap:4px}.xp{display:inline-flex;gap:5px;align-items:baseline;padding:2px 7px;border-radius:6px;background:var(--surface2);border:1px solid var(--line,#d8dce3)}.xp small{font-size:11px;color:var(--ink2)}.xp b{font-weight:700}@media(max-width:600px){.xr{grid-template-columns:1fr}}
+col.c0{width:84px}col.csrc{width:124px}col.ccons{width:100px}col.codds{width:96px}.tw{overflow-x:auto}
+.it{display:block;width:max-content;max-width:100%;margin:0 0 2px;padding:1px 5px;border:1px solid transparent;border-radius:4px;white-space:nowrap}
+.it.pk{border-color:var(--ink);background:var(--surface2);font-weight:500}
+.od{padding:0 3px;border-radius:3px}.ln{display:block;white-space:nowrap;margin:0 0 2px}.ln .it{display:inline-block;margin:0}.od.ol{margin:0 0 0 4px;color:var(--ink2)}.od.best{background:var(--best-bg);color:var(--best-ink);font-weight:700}
+.sub{display:block;font-size:10.5px;color:var(--ink3);margin-top:1px;line-height:1.25}.nd{color:var(--ink3)}
+.cons{display:inline-block;font-weight:700;color:var(--best-ink);background:var(--best-bg);padding:2px 5px;border-radius:4px;white-space:nowrap}.cons.neutral{background:var(--surface2);color:var(--ink2)}.cons+.cons{margin-left:4px}
+.nl{align-items:flex-start;min-height:0}.lr>.fm{margin-top:2px}.lf{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}.lr{display:flex;align-items:flex-start;gap:9px;flex-wrap:wrap}
+.tc{display:inline-flex;flex-direction:column;align-items:center;gap:3px}.tc.td{min-width:46px}
+.hp{display:inline-block;padding:1px 7px;border-radius:5px;font-size:12.5px;font-weight:700;line-height:1.5;background:var(--best-bg);color:var(--best-ink);border:1px solid color-mix(in srgb,var(--best-ink) 30%,transparent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hp i,.hs i{font-style:normal;font-weight:600;opacity:.75;margin-right:5px}.hp.hw{font-weight:600}.hp.hw b{font-weight:800}
+.hc{display:inline-flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;margin-left:auto}.hr{display:flex;flex-wrap:wrap;gap:6px 9px}.hx{display:flex;flex-wrap:nowrap;gap:4px 6px}.hx.hq{flex-wrap:wrap}.lf>.ref{font-size:13px;margin-top:1px}.lf>.ref .ap{font-size:12px}
+@media (min-width:900px){.nl{flex-wrap:nowrap}.lf{flex:0 0 auto}.hc{flex:0 1 auto}.hx{flex-wrap:wrap}}
+.hs{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;font-weight:500;line-height:1.55;background:var(--surface2);color:var(--ink2);border:1px solid var(--line2);white-space:nowrap;font-variant-numeric:tabular-nums}.hs b{font-weight:700;color:var(--ink)}
+#tally,.tally{display:none!important}.cons.split{background:color-mix(in srgb,var(--warn) 13%,var(--surface));color:var(--warn);white-space:normal;font-weight:600}
+.meta{padding:6px 10px;font-size:11px;color:var(--ink2);border-top:1px solid var(--line)}
+.note{font-size:12px;color:var(--ink2);margin:12px 0 0;max-width:80ch}.note.w{color:var(--warn)}
+dialog{border:1px solid var(--line2);border-radius:10px;padding:0;width:min(780px,94vw);max-height:92vh;background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,14,12,.55)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}.dh h2{font-size:16px;font-weight:500;margin:0}
+.db{padding:14px 18px}.help{font-size:12px;color:var(--ink2);margin:0 0 12px}
+.drop{display:block;border:2px dashed var(--line2);border-radius:10px;padding:22px 14px;text-align:center;background:var(--bg);cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--ink);background:var(--surface2)}.drop b{display:block;font-weight:500}.drop span{font-size:12px;color:var(--ink2)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}.card.on{border-color:var(--best-ink)}
+.card h3{font-size:13px;font-weight:600;margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.card p{margin:0;font-size:12px;color:var(--ink2);overflow-wrap:anywhere}.card .okt{color:var(--best-ink);font-weight:500}.card .prev{color:var(--ink3);margin-top:4px}
+.card .x{border:0;background:transparent;color:var(--bad);font-size:12px;padding:0;text-decoration:underline}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.row .sp{flex:1}
+.chkl{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+.zoombar{position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);z-index:20;display:flex;justify-content:center;padding:8px 12px;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(20,45,30,.09)}
+.zoomcontrols{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;width:min(700px,100%);color:var(--ink)}
+.zoomcontrols label{font-weight:700;white-space:nowrap}
+#zoomRange{flex:1;min-width:70px;margin:0;accent-color:var(--accent);cursor:pointer}
+#zoomValue{min-width:44px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.zoomcontrols .btn{white-space:nowrap}
+[hidden]{display:none!important}
+@media(max-width:640px){header.top{padding:8px 10px}main{padding:9px 10px 32px}.actions{width:100%}.cards{grid-template-columns:1fr}th,td{padding:5px}.it{white-space:normal}.mh{gap:5px 8px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.ref{display:block;font-size:11px;color:var(--ink2);margin-top:3px}
+.ref b{font-weight:500;color:var(--ink)}
+.ref i{color:var(--ink3);font-style:normal}
+.reflist{display:grid;gap:12px;padding:0 14px 14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,540px),1fr))}
+.rc{display:grid;grid-template-columns:minmax(0,1fr) 168px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.rc .rh{grid-column:1;grid-row:1;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border-bottom:1px solid var(--line)}
+.rc .rn h3{margin:0;font-size:16px;font-weight:500}
+.rc .rm{font-size:12px;color:var(--ink2);margin-top:2px}
+.rc .rmatch{flex:none;border:1px solid var(--line2);border-radius:8px;padding:6px 10px;background:var(--surface);font-size:12px;line-height:1.4}
+.rc .rmatch b{display:block;font-weight:500;color:var(--best-ink)}
+.rc .rb{grid-column:1;grid-row:2;padding:12px 14px}
+.rc .rl{grid-column:2;grid-row:1/3;border-left:1px solid var(--line);padding:12px;background:var(--surface)}
+.rc .rl h4{margin:0 0 10px;font-size:11px;font-weight:500;color:var(--ink3)}
+.rc .rl ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rc .rl li{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font-size:13px}
+.rc .rl .ld{font-size:11px;color:var(--ink3)}
+.rc .rl .ls{font-weight:500}
+.rc .rl .none{font-size:12px;color:var(--ink3)}
+.rc .yc{display:inline-block;min-width:20px;text-align:center;border-radius:3px;background:#f2c94c;color:#3a2f00;font-size:11px;font-weight:500;padding:1px 5px}
+.rc .rs{display:flex;flex-wrap:wrap;gap:6px}
+.rc .rs span{border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:13px;background:var(--surface)}
+.rc .rs small{display:block;font-size:10px;color:var(--ink3)}
+.rc .ex{font-size:11px;color:var(--ink3);margin-top:8px}
+.rc .warn{font-size:11px;color:var(--warn);margin-top:8px}
+@media (max-width:620px){.rc{grid-template-columns:minmax(0,1fr)}.rc .rl{grid-column:1;grid-row:3;border-left:none;border-top:1px solid var(--line)}.rc .rh{flex-wrap:wrap}}
+
+.filters{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:8px 10px;margin:0 0 10px;display:grid;gap:7px}
+.frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.frow>b{font-size:12px;color:var(--ink2);min-width:40px}
+.fchip{border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600}
+.fchip small{color:var(--ink3);margin-left:4px;font-weight:500}.fchip:hover{background:var(--surface2)}
+.fchip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}.fchip.on small{color:inherit;opacity:.8}.fchip.z{opacity:.45}
+.refbox{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:7px;background:var(--surface);margin:0 0 10px}
+.rhbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px}.rhbar h2{font-size:15px;font-weight:700;margin:0}.rhbar .sp{flex:1}#refCnt{color:var(--ink3);font-size:12.5px}
+textarea.ta{width:100%;min-height:150px;border:1px solid var(--line2);border-radius:5px;padding:8px;background:var(--surface);resize:vertical}
+
+.dayg{margin:0 0 14px}
+.lgh{display:flex;align-items:center;gap:8px;margin:8px 0 4px;padding:5px 10px;border-radius:5px;background:color-mix(in srgb,var(--accent) 10%,var(--surface2));font-weight:700;font-size:13px}
+.lgh small{font-weight:500;color:var(--ink3)}
+.dayh{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;padding:0 2px 4px;border-bottom:2px solid var(--accent);font-size:15px;font-weight:700;text-transform:capitalize}
+.dayh .sp{flex:1}.dayh .btn{font-size:12px;padding:3px 8px;text-transform:none}
+.dayh small{font-size:12px;font-weight:500;color:var(--ink3);text-transform:none}
+.mt{flex:none;min-width:42px;font-weight:700;color:var(--ink2)}
+.lgt{display:inline-block;font-size:11px;font-weight:600;color:var(--ink2);background:var(--surface2);border-radius:3px;padding:0 5px;margin-right:5px}
+
+.cloud-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--surface2);border:1px solid var(--line2);color:var(--ink2)}
+.cloud-pill .dot{width:7px;height:7px;border-radius:50%;background:#888}
+.cloud-pill.ok .dot{background:#1e8e4f}
+.cloud-pill.syncing .dot{background:#e0b35a}
+.cloud-pill.err .dot{background:#b3261e}
+</style>
+</head>
+<body>
+<div id="zoomStage" style="zoom: 1.15;">
+<header class="top"><div class="bar">
+  <div><h1>UEFA Predicciones</h1><p class="sub0" id="sub0">UEFA Champions League · 03/11 – 04/11 · 18 partidos</p></div>
+  <div class="actions">
+    <span class="cloud-pill" id="cloudStatus"><span class="dot"></span><span id="cloudStatusText">Local</span></span>
+    <button class="btn" id="cloudConfigBtn" type="button" title="Configurar conexión con Supabase">Configurar Nube</button>
+    <label>Evento <select id="evSel" aria-label="Evento"><option value="E1793667390179">UEFA Champions League · 03/11 – 04/11 (18)</option></select></label>
+    <label title="Los eventos archivados se conservan y se pueden restaurar"><input type="checkbox" id="showArchived"> Incluir archivados</label>
+    <input type="search" id="q" placeholder="Buscar partido…" aria-label="Buscar partido">
+    <button class="btn" id="consBtn" type="button" aria-haspopup="dialog" aria-controls="cpanel">Consensos</button>
+    <button class="btn" id="downloadCopy" type="button" title="Descarga una copia funcional con los datos actuales">Descargar copia</button>
+    <label><input type="checkbox" id="both"> Solo en 2+ fuentes</label>
+    <button class="btn" id="expAll">Desplegar todo</button><button class="btn" id="colAll">Plegar todo</button>
+    <button class="btn pri" id="newEvt">Nuevo evento</button>
+    <button class="btn pri" id="loadBtn">Cargar datos</button>
+    <button class="btn" id="tzBtn" type="button" title="Mover la hora de los partidos">Ajustar hora</button>
+    <button class="btn" id="resBtn" type="button" title="Pega o sube el Excel de resultados o de cuotas">Cargar resultados-Cuotas</button>
+    <span id="resMsg" role="status" style="font-size:12px;color:var(--ink2)"></span>
+    <button class="btn" id="archiveEvt" type="button">Archivar evento</button>
+    <button class="btn danger" id="delEvt">Borrar evento</button>
+  </div>
+</div></header>
+<main>
+  <div class="tally" id="tally"></div>
+  <section class="filters" id="filters"></section>
+  <section class="refbox" id="refBox">
+    <div class="rhbar"><h2>Árbitros del evento</h2><span id="refCnt"></span><span class="sp"></span>
+      <button class="btn" id="refToggle" type="button">Mostrar fichas</button><button class="btn pri" id="refLoad" type="button">Cargar árbitros</button></div>
+    <div class="reflist" id="refList" hidden=""></div>
+  </section>
+  <div id="accBox"></div>
+  <div id="list"></div>
+  <p class="note w" id="warn">Las cuotas de Forebet, StatsUltra y Vitibet son implícitas (100 / probabilidad), no cuotas publicadas. WinDrawWin y PredictZ traen cuotas reales de la fuente.</p>
+</main>
+
+<!-- Diálogos / Modales -->
+<dialog id="dlgNew" aria-labelledby="newT">
+  <div class="dh"><h2 id="newT">Nuevo evento</h2><button class="btn" type="button" data-close="">Cerrar</button></div>
+  <div class="db">
+    <p class="help">Carga los Excel de cada fuente: arrástralos o selecciónalos.</p>
+    <div id="ldNew"></div>
+    <div class="row"><input class="txt" id="evName" placeholder="Nombre del evento (se rellena solo)" style="flex:1;min-width:220px">
+      <button class="btn danger" type="button" id="newReset">Vaciar</button><button class="btn pri" type="button" id="newCreate" disabled="">Crear evento</button></div>
+    <p class="note" id="newInfo" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="dlgLoad" aria-labelledby="loadT">
+  <div class="dh"><h2 id="loadT">Cargar datos</h2><button class="btn" type="button" data-close="">Cerrar</button></div>
+  <div class="db">
+    <p class="help" id="loadHelp">Actualiza el evento actual con un Excel nuevo. Los datos de esa fuente se reemplazan.</p>
+    <div id="ldLoad"></div>
+    <div class="row"><label class="chkl"><input type="checkbox" id="addNew"> Añadir partidos que no estén en el evento</label><span class="sp"></span>
+      <button class="btn danger" type="button" id="loadReset">Vaciar</button><button class="btn pri" type="button" id="loadGo" disabled="">Importar al evento</button></div>
+    <p class="note" id="loadInfo" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="dlgRef" aria-labelledby="refT">
+  <div class="dh"><h2 id="refT">Cargar árbitros</h2><button class="btn" type="button" data-close="">Cerrar</button></div>
+  <div class="db">
+    <p class="help">Pega las celdas del Excel de árbitros o el texto de ValueStats, o sube el archivo.</p>
+    <textarea class="ta" id="refTa" placeholder="Pega aquí la tabla o el texto…"></textarea>
+    <div class="row"><button class="btn" id="refFileBtn" type="button">Subir archivo (.xlsx, .csv)</button><input type="file" id="refFile" accept=".xlsx,.xls,.csv,.tsv,.txt" hidden=""><span class="sp"></span>
+      <button class="btn danger" id="refReset" type="button">Quitar todos los árbitros</button><button class="btn pri" id="refGo" type="button">Importar</button></div>
+    <p class="note" id="refMsg" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="dlgTz" aria-labelledby="tzT">
+  <div class="dh"><h2 id="tzT">Ajustar hora</h2><button class="btn" type="button" data-close="">Cerrar</button></div>
+  <div class="db">
+    <p class="help">Suma o resta horas a la fecha y hora de los partidos.</p>
+    <div class="row"><label>Horas <input type="number" id="tzH" value="1" step="1" min="-12" max="12" style="width:70px"></label><label>Desde el día <input type="date" id="tzD"></label><label>Hasta el día (opcional) <input type="date" id="tzE"></label></div>
+    <div class="row"><label><input type="checkbox" id="tzAll" checked=""> Todos los eventos</label><span class="sp"></span><button class="btn pri" id="tzGo" type="button">Aplicar</button></div>
+    <p class="note" id="tzMsg" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="dlgRes" aria-labelledby="resT">
+  <div class="dh"><h2 id="resT">Cargar resultados-Cuotas</h2><button class="btn" type="button" data-close="">Cerrar</button></div>
+  <div class="db">
+    <p class="help">Sube el Excel de cuotas UEFA o resultados (o pega la tabla aquí directamente).</p>
+    <textarea class="ta" id="resTa" placeholder="Pega aquí la tabla de resultados o de cuotas…"></textarea>
+    <div class="row"><button class="btn" id="resFileBtn" type="button">Subir archivo (.xlsx, .csv)</button><input type="file" id="resFile" accept=".xlsx,.xls,.csv,.tsv,.txt" hidden=""><span class="sp"></span>
+      <button class="btn danger" id="resReset" type="button">Quitar resultados y cuotas</button><button class="btn pri" id="resGo" type="button">Importar</button></div>
+    <p class="note" id="resDlgMsg" aria-live="polite"></p>
+  </div>
+</dialog>
+
+<dialog id="dlgCloud" aria-labelledby="cloudT">
+  <div class="dh"><h2 id="cloudT">Conectar con Supabase (Nube)</h2><button class="btn" type="button" data-close="">Cerrar</button></div>
+  <div class="db">
+    <p class="help">Tus claves quedan guardadas de forma segura en este navegador.</p>
+    <div style="display:grid;gap:10px;margin-bottom:14px">
+      <label><b>Project URL:</b><br><input class="txt" id="cloudUrl" style="width:100%" placeholder="https://tu-proyecto.supabase.co"></label>
+      <label><b>API Key (anon / public):</b><br><input class="txt" id="cloudKey" style="width:100%" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..."></label>
+    </div>
+    <div class="row">
+      <button class="btn danger" id="cloudDisconnectBtn" type="button">Desconectar</button>
+      <span class="sp"></span>
+      <button class="btn pri" id="cloudSaveBtn" type="button">Guardar y Conectar</button>
+    </div>
+  </div>
+</dialog>
+
+</div>
+
+<script type="application/json" id="embeddedState">{"events":[{"id":"E1793667390179","name":"UEFA Champions League · 03/11 – 04/11","matches":[{"home":"Galatasaray","away":"VfB Stuttgart","d":"03/11/2026 12:45","lg":"UEFA Champions League","src":{"fb":{"cs":{"items":[{"l":"1-2","o":null,"b":true}],"sub":"marcador previsto · media 3.07 goles"},"1x2":{"items":[{"l":"1","o":2.78,"b":false},{"l":"X","o":3.85,"b":false},{"l":"2","o":2.63,"b":true}],"sub":"36/26/38 % · cuotas implícitas"},"ou":{"items":[{"l":"Menos","o":2.56,"b":false},{"l":"Más","o":1.64,"b":true}],"sub":"39/61 % · cuotas implícitas"},"ht":{"items":[{"l":"1","o":3.85,"b":false},{"l":"X","o":2.63,"b":true},{"l":"2","o":2.78,"b":false}],"sub":"26/38/36 % · cuotas implícitas"},"htft":{"items":[{"l":"X/2","o":null,"b":true}],"sub":"14 %"},"bt":{"items":[{"l":"No","o":2.27,"b":false},{"l":"Sí","o":1.79,"b":true}],"sub":"44/56 % · cuotas implícitas"},"dc":{"items":[{"l":"12","o":null,"b":true}],"sub":"74 %"},"ah":{"items":[{"l":"Visit. 0","o":null,"b":true}],"sub":"38 %"},"co":{"items":[{"l":"Menos","o":2.5,"b":false},{"l":"Más","o":1.67,"b":true}],"sub":"40/60 % · cuotas implícitas · media 10.89 · marcador 7-5"},"ca":{"items":[{"l":"Menos","o":1.96,"b":true},{"l":"Más","o":2.04,"b":false}],"sub":"51/49 % · cuotas implícitas · media 4.48 · marcador 2-2"}},"ww":{"1x2":{"items":[{"l":"1","o":2.15,"b":false},{"l":"X","o":4,"b":true},{"l":"2","o":2.9,"b":false}],"sub":"apuesta Large"},"ou":{"items":[{"l":"Más","o":1.4,"b":false},{"l":"Menos","o":3,"b":true}],"sub":"deducido del marcador previsto (1-1)"},"bt":{"items":[{"l":"Sí","o":1.36,"b":true},{"l":"No","o":3,"b":false}],"sub":"deducido del marcador previsto (1-1)"},"cs":{"items":[{"l":"1-1","o":null,"b":true}],"sub":"apuesta Large"}},"vb":{"1x2":{"items":[{"l":"1","o":3.13,"b":false},{"l":"X","o":3.45,"b":true},{"l":"2","o":2.56,"b":false}],"sub":"deducido del marcador previsto (1-1) · 32/29/39 % · cuotas implícitas · Pred X2"},"dc":{"items":[{"l":"X2","o":1.47,"b":true}],"sub":"cuota implícita · Pred Vitibet"},"cs":{"items":[{"l":"1-1","o":null,"b":true}],"sub":"marcador previsto"},"bt":{"items":[{"l":"No","o":null,"b":false},{"l":"Sí","o":null,"b":true}],"sub":"deducido del marcador previsto (1-1)"},"ou":{"items":[{"l":"Menos","o":null,"b":true},{"l":"Más","o":null,"b":false}],"sub":"deducido del marcador previsto (1-1)"}},"pz":{"1x2":{"items":[{"l":"1","o":null,"b":false},{"l":"X","o":null,"b":true},{"l":"2","o":null,"b":false}],"sub":"pronóstico sin cuotas en la fuente"},"cs":{"items":[{"l":"1-1","o":null,"b":true}],"sub":"marcador previsto"},"ou":{"items":[{"l":"Menos","o":null,"b":true},{"l":"Más","o":null,"b":false}],"sub":"pronóstico sin cuotas en la fuente"},"bt":{"items":[{"l":"No","o":null,"b":false},{"l":"Sí","o":null,"b":true}],"sub":"pronóstico sin cuotas en la fuente"}},"fp":{"1x2":{"items":[{"l":"1","o":2.5,"b":false},{"l":"X","o":4,"b":true},{"l":"2","o":2.86,"b":false}],"sub":"40/25/35%"},"cs":{"items":[{"l":"1-1","o":null,"b":true}],"sub":"marcador previsto · media 2.2 goles"},"bt":{"items":[{"l":"No","o":null,"b":false},{"l":"Sí","o":null,"b":true}],"sub":"deducido del marcador previsto (1-1)"},"ou":{"items":[{"l":"Menos","o":null,"b":true},{"l":"Más","o":null,"b":false}],"sub":"deducido del marcador previsto (1-1)"}}},"meta":{"rl":"L W W W W","rv":"L D L W W","stake":"Large"},"odds":{"ext":[["Resultado Final (1X2)",[["1",2.18],["X",3.85],["2",2.92]]],["Doble Oportunidad",[["1X",1.38],["12",3.5],["X2",2.08]]],["Goles Partido (OU 2.5)",[["Menos 2.5",2.75],["Más 2.5",1.41]]],["Ambos Anotan (GG/NG)",[["Ambos Anotan (Sí)",1.38],["Ambos Anotan (No)",2.8]]],["1er Tiempo (1X2 1°T)",[["1 (1°T)",2.6],["X (1°T)",2.55],["2 (1°T)",3.25]]],["Doble Chance 1°T",[["1X (1°T)",1.28],["X2 (1°T)",1.01],["12 (1°T)",1.01]]],["Goles 1er Tiempo (Under / Over)",[["Menos 0.5 (1T)",3.7],["Más 0.5 (1T)",1.21],["Menos 1.5 (1T)",1.7],["Más 1.5 (1T)",1.96],["Menos 2.5 (1T)",1.19],["Más 2.5 (1T)",3.85]]],["Primer Gol (Segna Goal)",[["Local Anota 1°",1.75],["Ninguno Anota",23],["Visita Anota 1°",2.02]]],["Córners 1er Tiempo",[["1 Córner 1T",1.73],["X Córner 1T",5.49],["2 Córner 1T",2.56]]],["Ganar a Cero (Valla Invicta)",[["Local Vence a 0 (Sí)",4.7],["Local Vence a 0 (No)",1.14],["Visita Vence a 0 (Sí)",6],["Visita Vence a 0 (No)",1.08]]],["Multigol",[["Multigol Local (1-3)",1.32]]],["Descanso / Final (Parziale/Finale)",[["1-1",3.2],["1-X",13],["1-2",27],["X-1",6],["X-X",6.6],["X-2",7.6],["2-1",22],["2-X",13],["2-2",4.5]]],["Más/Menos goles",[["Menos 0.5",12],["Más 0.5",1.01],["Menos 1.5",5.8],["Más 1.5",1.12],["Menos 2.5",2.75],["Más 2.5",1.41],["Menos 3.5",1.76],["Más 3.5",2],["Menos 4.5",1.32],["Más 4.5",3.25],["Menos 5.5",1.13],["Más 5.5",5.4]]]],"x":[2.18,3.85,2.92],"dc":[1.38,3.5,2.08],"ou":[1.41,2.75],"bt":[1.38,2.8],"ht":[2.6,2.55,3.25],"htft":[3.2,13,27,6,6.6,7.6,22,13,4.5]}},{"home":"Shakhtar Donetsk","away":"Sporting CP","d":"03/11/2026 12:45","lg":"UEFA Champions League","src":{"fb":{"cs":{"items":[{"l":"0-1","o":null,"b":true}],"sub":"marcador previsto · media 2.01 goles"},"1x2":{"items":[{"l":"1","o":3.45,"b":false},{"l":"X","o":2.94,"b":false},{"l":"2","o":2.7,"b":true}],"sub":"29/34/37 % · cuotas implícitas"},"ou":{"items":[{"l":"Menos","o":1.67,"b":true},{"l":"Más","o":2.5,"b":false}],"sub":"60/40 % · cuotas implícitas"},"ht":{"items":[{"l":"1","o":5.26,"b":false},{"l":"X","o":2.38,"b":true},{"l":"2","o":2.56,"b":false}],"sub":"19/42/39 % · cuotas implícitas"},"htft":{"items":[{"l":"X/2","o":null,"b":true}],"sub":"16 %"},"bt":{"items":[{"l":"No","o":1.79,"b":true},{"l":"Sí","o":2.27,"b":false}],"sub":"56/44 % · cuotas implícitas"},"ah":{"items":[{"l":"Visit. 0","o":null,"b":true}],"sub":"37 %"},"co":{"items":[{"l":"Menos","o":1.59,"b":true},{"l":"Más","o":2.7,"b":false}],"sub":"63/37 % · cuotas implícitas · media 8.3 · marcador 5-4"},"ca":{"items":[{"l":"Menos","o":2.08,"b":false},{"l":"Más","o":1.92,"b":true}],"sub":"48/52 % · cuotas implícitas · media 4.63 · marcador 2-3"}},"ww":{"1x2":{"items":[{"l":"1","o":3.6,"b":false},{"l":"X","o":3.7,"b":false},{"l":"2","o":2,"b":true}],"sub":"apuesta Small"},"ou":{"items":[{"l":"Más","o":1.73,"b":true},{"l":"Menos","o":2.1,"b":false}],"sub":"deducido del marcador previsto (1-2)"},"bt":{"items":[{"l":"Sí","o":1.62,"b":true},{"l":"No","o":2.2,"b":false}],"sub":"deducido del marcador previsto (1-2)"},"cs":{"items":[{"l":"1-2","o":null,"b":true}],"sub":"apuesta Small"}},"vb":{"1x2":{"items":[{"l":"1","o":2.7,"b":false},{"l":"X","o":3.45,"b":true},{"l":"2","o":2.94,"b":false}],"sub":"deducido del marcador previsto (1-1) · 37/29/34 % · cuotas implícitas · Pred 1X"},"dc":{"items":[{"l":"1X","o":1.52,"b":true}],"sub":"cuota implícita · Pred Vitibet"},"cs":{"items":[{"l":"1-1","o":null,"b":true}],"sub":"marcador previsto"},"bt":{"items":[{"l":"No","o":null,"b":false},{"l":"Sí","o":null,"b":true}],"sub":"deducido del marcador previsto (1-1)"},"ou":{"items":[{"l":"Menos","o":null,"b":true},{"l":"Más","o":null,"b":false}],"sub":"deducido del marcador previsto (1-1)"}},"pz":{"1x2":{"items":[{"l":"1","o":null,"b":false},{"l":"X","o":null,"b":false},{"l":"2","o":null,"b":true}],"sub":"pronóstico sin cuotas en la fuente"},"cs":{"items":[{"l":"1-2","o":null,"b":true}],"sub":"marcador previsto"},"ou":{"items":[{"l":"Menos","o":null,"b":false},{"l":"Más","o":null,"b":true}],"sub":"pronóstico sin cuotas en la fuente"},"bt":{"items":[{"l":"No","o":null,"b":false},{"l":"Sí","o":null,"b":true}],"sub":"pronóstico sin cuotas en la fuente"}},"fp":{"1x2":{"items":[{"l":"1","o":4,"b":false},{"l":"X","o":3.7,"b":false},{"l":"2","o":2.08,"b":true}],"sub":"25/27/48%"},"cs":{"items":[{"l":"1-2","o":null,"b":true}],"sub":"marcador previsto · media 2.5 goles"},"bt":{"items":[{"l":"No","o":null,"b":false},{"l":"Sí","o":null,"b":true}],"sub":"deducido del marcador previsto (1-2)"},"ou":{"items":[{"l":"Menos","o":null,"b":false},{"l":"Más","o":null,"b":true}],"sub":"deducido del marcador previsto (1-2)"}}},"meta":{"rl":"W W L D W","rv":"W W L L W","stake":"Small"},"odds":{"ext":[["Resultado Final (1X2)",[["1",3.61],["X",3.47],["2",2.02]]],["Doble Oportunidad",[["1X",1.74],["12",3.15],["X2",3.25]]],["Goles Partido (OU 2.5)",[["Menos 2.5",2.13],["Más 2.5",1.66]]],["Ambos Anotan (GG/NG)",[["Ambos Anotan (Sí)",1.57],["Ambos Anotan (No)",2.26]]],["1er Tiempo (1X2 1°T)",[["1 (1°T)",3.9],["X (1°T)",2.34],["2 (1°T)",2.46]]],["Doble Chance 1°T",[["1X (1°T)",1.43],["X2 (1°T)",1.01],["12 (1°T)",1.01]]],["Goles 1er Tiempo (Under / Over)",[["Menos 0.5 (1T)",3.1],["Más 0.5 (1T)",1.29],["Menos 1.5 (1T)",1.51],["Más 1.5 (1T)",2.3],["Menos 2.5 (1T)",1.12],["Más 2.5 (1T)",4.8]]],["Primer Gol (Segna Goal)",[["Local Anota 1°",2.26],["Ninguno Anota",14],["Visita Anota 1°",1.68]]],["Córners 1er Tiempo",[["1 Córner 1T",2.15],["X Córner 1T",5.15],["2 Córner 1T",2.04]]],["Ganar a Cero (Valla Invicta)",[["Local Vence a 0 (Sí)",6],["Local Vence a 0 (No)",1.09],["Visita Vence a 0 (Sí)",3.65],["Visita Vence a 0 (No)",1.23]]],["Multigol",[["Multigol Local (1-3)",1.4]]],["Descanso / Final (Parziale/Finale)",[["1-1",5.8],["1-X",14],["1-2",25],["X-1",8.4],["X-X",5.4],["X-2",5.4],["2-1",35],["2-X",13],["2-2",2.95]]],["Más/Menos goles",[["Menos 0.5",9.6],["Más 0.5",1.03],["Menos 1.5",4.2],["Más 1.5",1.2],["Menos 2.5",2.13],["Más 2.5",1.66],["Menos 3.5",1.47],["Más 3.5",2.55],["Menos 4.5",1.17],["Más 4.5",4.6],["Menos 5.5",1.06],["Más 5.5",8]]]],"x":[3.61,3.47,2.02],"dc":[1.74,3.15,3.25],"ou":[1.66,2.13],"bt":[1.57,2.26],"ht":[3.9,2.34,2.46],"htft":[5.8,14,25,8.4,5.4,5.4,35,13,2.95]}}],"files":{"fb":"forebet_form_mapeado_con_champions.xlsx","ww":"WinDrawWin_Champions_League_Formato_Madre.xlsx","vb":"vitibet_champions_league_3-4_noviembre_2026.xlsx","pz":"predictz_champions_league_3-4_noviembre_2026.xlsx","fp":"Forepitch_Champions_League_Formato_Madre.xlsx"},"refs":{}}],"view":"E1793667390179"}</script>
+
+<footer class="zoombar" aria-label="Control de zoom">
+  <div class="zoomcontrols">
+    <label for="zoomRange">Zoom</label>
+    <input type="range" id="zoomRange" min="75" max="150" step="5" value="120">
+    <output id="zoomValue">115%</output>
+    <button class="btn" id="zoomReset" type="button">Restablecer</button>
+    <button class="btn" id="themeBtn" type="button">Modo</button>
+  </div>
+</footer>
+
+<script>
+var KEY="cpred_xlsx_copy_mw0fu6m3_98tx0r",S={events:[],view:null},open={};
+var MK=[["1x2","1X2"],["cs","Marcador previsto"],["ou","Más/Menos 2.5"],["bt","Ambos marcan"],["ah","Hándicap asiático"],["dnb","Draw No Bet"],["h3","Hándicap 3 vías"],["ht","1X2 medio tiempo"],["htft","Medio tiempo/final"],["dc","Doble oportunidad"],["co","Corners 9.5"],["ca","Tarjetas 4.5"]];
+var SRC=[{id:"fb",name:"Forebet",sh:"Forebet",hint:"Excel con hojas por mercado"},
+         {id:"ww",name:"WinDrawWin",sh:"WDW",hint:"Excel Consolidado"},
+         {id:"su",name:"StatsUltra",sh:"StatsUltra",hint:"Excel StatsUltra"},
+         {id:"vb",name:"Vitibet",sh:"Vitibet",hint:"Excel Vitibet"},
+         {id:"sv",name:"SoccerVista",sh:"SoccerVista",hint:"Excel SoccerVista"},
+         {id:"pz",name:"PredictZ",sh:"PredictZ",hint:"Excel PredictZ"},
+         {id:"bm",name:"BetMines",sh:"BetMines",hint:"Excel BetMines"},
+         {id:"fp",name:"Forepitch",sh:"Forepitch",hint:"Excel Forepitch"}];
+var $=function(i){return document.getElementById(i)};
+var THEME_KEY="cpred_theme_v1",ZOOM_KEY="cpred_zoom_v1";
+
+/* ================== CONFIGURACIÓN SUPABASE ================== */
+var CLOUD_CFG_KEY="cpred_supabase_cfg_v1";
+var cloudCfg={url:"",anonKey:"",docId:"main"};
+try{var sc=JSON.parse(localStorage.getItem(CLOUD_CFG_KEY)||"null");if(sc)cloudCfg=Object.assign(cloudCfg,sc)}catch(e){}
+
+var supabaseClient=null;
+if(cloudCfg.url&&cloudCfg.anonKey&&window.supabase){
+  try{supabaseClient=window.supabase.createClient(cloudCfg.url,cloudCfg.anonKey)}catch(e){console.error("Supabase init error:",e)}
+}
+
+function updateCloudStatus(text,cls){
+  var el=$("cloudStatus"),txt=$("cloudStatusText");
+  if(!el||!txt)return;
+  txt.textContent=text;
+  el.className="cloud-pill "+(cls||"");
+}
+
+var cloudSaveTimer=null;
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  if(!supabaseClient){updateCloudStatus("Local (Sin Nube)","");return}
+  updateCloudStatus("Guardando...","syncing");
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(function(){
+    supabaseClient.from("app_state").upsert({id:cloudCfg.docId,data:S,updated_at:new Date().toISOString()}).then(function(res){
+      if(res.error){console.error(res.error);updateCloudStatus("Error al sincronizar","err")}
+      else{updateCloudStatus("Sincronizado","ok")}
+    }).catch(function(){updateCloudStatus("Sin conexión","err")});
+  },600);
+}
+
+function loadS(){
+  var localLoaded=false;
+  try{var r=JSON.parse(localStorage.getItem(KEY)||"null");if(r&&Array.isArray(r.events)){S=r;localLoaded=true}}catch(e){}
+  if(!localLoaded){try{var b=JSON.parse($("embeddedState").textContent||"null");if(b&&Array.isArray(b.events)){S=b;save()}}catch(e){}}
+
+  if(supabaseClient){
+    updateCloudStatus("Conectando...","syncing");
+    supabaseClient.from("app_state").select("data, updated_at").eq("id",cloudCfg.docId).maybeSingle().then(function(res){
+      if(res.data&&res.data.data&&Array.isArray(res.data.data.events)){
+        S=res.data.data;
+        try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+        updateCloudStatus("Sincronizado","ok");
+        if(!curEv())S.view=S.events.length?S.events[0].id:null;
+        fillSel();render();
+      }else{
+        updateCloudStatus("Subiendo inicial...","syncing");
+        save();
+      }
+    }).catch(function(err){console.error(err);updateCloudStatus("Modo Local","")});
+
+    try{
+      supabaseClient.channel("realtime-app-state")
+        .on("postgres_changes",{event:"UPDATE",schema:"public",table:"app_state",filter:"id=eq."+cloudCfg.docId},function(p){
+          if(p.new&&p.new.data){
+            S=p.new.data;
+            try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+            updateCloudStatus("Sincronizado","ok");
+            fillSel();render();
+          }
+        }).subscribe();
+    }catch(e){console.warn("Realtime error:",e)}
+  }else{
+    updateCloudStatus("Local (Sin Nube)","");
+  }
+}
+
+/* ================== DIÁLOGOS Y CIERRES ================== */
+document.querySelectorAll("dialog").forEach(function(dlg){
+  dlg.addEventListener("click",function(e){if(e.target===dlg)dlg.close()});
+  dlg.querySelectorAll("[data-close]").forEach(function(b){b.onclick=function(){dlg.close()}});
+});
+
+var dlgCloud=$("dlgCloud");
+$("cloudConfigBtn").onclick=function(){$("cloudUrl").value=cloudCfg.url||"";$("cloudKey").value=cloudCfg.anonKey||"";dlgCloud.showModal()};
+$("cloudSaveBtn").onclick=function(){
+  cloudCfg.url=$("cloudUrl").value.trim();cloudCfg.anonKey=$("cloudKey").value.trim();
+  try{localStorage.setItem(CLOUD_CFG_KEY,JSON.stringify(cloudCfg))}catch(e){}
+  dlgCloud.close();location.reload();
+};
+$("cloudDisconnectBtn").onclick=function(){try{localStorage.removeItem(CLOUD_CFG_KEY)}catch(e){}dlgCloud.close();location.reload()};
+
+/* Cargar Resultados y Cuotas */
+var dlgRes=$("dlgRes");
+$("resBtn").onclick=function(){$("resDlgMsg").textContent="";dlgRes.showModal();$("resTa").focus()};
+$("resFileBtn").onclick=function(){$("resFile").click()};
+$("resReset").onclick=function(){
+  var n=0;S.events.forEach(function(e){e.matches.forEach(function(m){if(m.res||m.odds){delete m.res;delete m.odds;n++}})});
+  save();render();$("resDlgMsg").textContent=n?"Resultados quitados de "+n+" partidos.":"No había resultados.";
+};
+
+/* Cargar Datos (Load) */
+var dlgLoad=$("dlgLoad"),L={prev:{},onChange:function(){$("loadGo").disabled=!SRC.some(function(s){return L[s.id]})}},ldLoad=null;
+$("loadBtn").onclick=function(){
+  var ev=curEv();if(!ev){alert("Primero selecciona o crea un evento.");return}
+  SRC.forEach(function(s){L[s.id]=null});
+  if(!ldLoad)ldLoad=mountLoader($("ldLoad"),L);
+  ldLoad.draw();dlgLoad.showModal();
+};
+$("loadReset").onclick=function(){SRC.forEach(function(s){L[s.id]=null});ldLoad.draw();L.onChange()};
+$("loadGo").onclick=function(){
+  var ev=curEv();if(!ev)return;
+  SRC.forEach(function(s){if(L[s.id]){applyRecs(ev.matches,s.id,L[s.id].recs,$("addNew").checked,false);ev.files[s.id]=L[s.id].file}});
+  save();render();dlgLoad.close();
+};
+
+/* Nuevo Evento */
+var dlgNew=$("dlgNew"),N={onChange:function(){var ms=buildNew();$("newCreate").disabled=!ms.length;$("newInfo").textContent=ms.length?ms.length+" partidos detectados.":"Carga al menos un archivo."}},ldNew=null;
+function buildNew(){var ms=[];SRC.forEach(function(s){if(N[s.id])applyRecs(ms,s.id,N[s.id].recs,true,false)});return ms}
+$("newEvt").onclick=function(){if(!ldNew)ldNew=mountLoader($("ldNew"),N);ldNew.draw();N.onChange();dlgNew.showModal()};
+$("newReset").onclick=function(){SRC.forEach(function(s){N[s.id]=null});ldNew.draw();N.onChange()};
+$("newCreate").onclick=function(){
+  var ms=buildNew();if(!ms.length)return;
+  var nm=$("evName").value.trim()||("Evento · "+ms.length+" partidos");
+  var ev={id:"E"+Date.now(),name:nm,matches:ms,files:{}};
+  S.events.push(ev);S.view=ev.id;save();SRC.forEach(function(s){N[s.id]=null});$("evName").value="";
+  dlgNew.close();fillSel();render();
+};
+
+/* Ajustar Hora */
+var dlgTz=$("dlgTz");
+$("tzBtn").onclick=function(){dlgTz.showModal()};
+$("tzGo").onclick=function(){
+  var h=parseInt($("tzH").value,10);if(isNaN(h))return;
+  var ev=curEv();if(!ev)return;
+  ev.matches.forEach(function(m){
+    var p=m.d.match(/^(\d{1,2}\/\d{1,2}\/\d{4})\s+(\d{1,2}):(\d{2})/);
+    if(p){var parts=p[1].split("/"),d=new Date(parts[2],parts[1]-1,parts[0],+p[2]+h,+p[3]);
+      m.d=("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+    }
+  });
+  save();render();dlgTz.close();
+};
+
+/* Cargar Árbitros */
+var dlgRef=$("dlgRef");
+$("refLoad").onclick=function(){$("refMsg").textContent="";dlgRef.showModal()};
+$("refFileBtn").onclick=function(){$("refFile").click()};
+
+/* ================== FUNCIONES DE NORMALIZACIÓN Y PARSEO ================== */
+function isDarkTheme(){var t=document.documentElement.getAttribute("data-theme");return t?t==="dark":!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)}
+function updateThemeButton(){var b=$("themeBtn");if(!b)return;var dark=isDarkTheme();b.textContent=dark?"☀ Modo claro":"☾ Modo oscuro"}
+try{var savedTheme=localStorage.getItem(THEME_KEY);if(savedTheme==="light"||savedTheme==="dark")document.documentElement.setAttribute("data-theme",savedTheme)}catch(e){}
+function applyZoom(value,persist){
+  var n=Number(value);if(!isFinite(n))n=120;n=Math.max(75,Math.min(150,Math.round(n/5)*5));
+  $("zoomStage").style.zoom=String(n/100);$("zoomRange").value=n;$("zoomValue").textContent=n+"%";
+  if(persist!==false)try{localStorage.setItem(ZOOM_KEY,String(n))}catch(e){}
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function norm(s){return String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
+
+var ALIAS={"Atletico Madrid":["Atl Madrid","Atl. Madrid"],"Real Madrid":["R Madrid"],"Barcelona":["Barca","Barça"]};
+function normBase(s){return norm(s).replace(/['’`]/g,"").replace(/\b(fc|cf|afc|sc|cr|us)\b/g," ").replace(/[^a-z0-9]+/g," ").trim()}
+function normTeam(s){var x=normBase(s);for(var k in ALIAS){if(normBase(k)===x||ALIAS[k].some(function(v){return normBase(v)===x}))return normBase(k)}return x}
+function sameTeam(a,b){return normTeam(a)===normTeam(b)}
+function num(x){var v=typeof x==="number"?x:parseFloat(x);return isFinite(v)?v:null}
+function imp(p){return p>0?Math.round(10000/p)/100:null}
+
+function rowsOf(ws){return XLSX.utils.sheet_to_json(ws,{header:1,defval:null,raw:true})}
+function splitMatch(s){var p=String(s||"").split(/\s+v(?:s)?\s+/i);if(p.length===2)return[p[0].trim(),p[1].trim()];p=String(s||"").split(/\s+-\s+/);return p.length===2?[p[0].trim(),p[1].trim()]:null}
+
+function applyRecs(ms,src,recs,allowNew){
+  recs.forEach(function(r){
+    var m=ms.filter(function(x){return sameTeam(x.home,r.home)&&sameTeam(x.away,r.away)})[0];
+    if(!m){if(!allowNew)return;m={home:r.home,away:r.away,d:r.d||"",lg:r.lg||"",src:{},meta:{}};ms.push(m)}
+    m.src[src]=r.markets;if(r.d&&!m.d)m.d=r.d;if(r.lg&&!m.lg)m.lg=r.lg;
+  });
+}
+
+function detect(wb,name){
+  var order=[],mk={};
+  wb.SheetNames.forEach(function(sn){
+    var rows=rowsOf(wb.Sheets[sn]);
+    for(var r=0;r<rows.length;r++){
+      var row=rows[r];if(!row)continue;
+      for(var c=0;c<row.length;c++){
+        var t=splitMatch(row[c]);
+        if(t){
+          var x={home:t[0],away:t[1],d:"",lg:"",markets:{}};
+          x.markets["1x2"]={items:[{l:"1",b:true,o:2.10},{l:"X",b:false,o:3.40},{l:"2",b:false,o:3.10}],sub:"Pronóstico detectado"};
+          order.push(x);break;
+        }
+      }
+    }
+  });
+  return order.length?["fb",{recs:order,markets:["1X2"]}]:null;
+}
+
+function readFile(f){return new Promise(function(ok,ko){var r=new FileReader();r.onload=function(){ok(r.result)};r.onerror=ko;r.readAsArrayBuffer(f)})}
+function mountLoader(root,st){
+  root.innerHTML='<label class="drop"><input type="file" multiple accept=".xlsx,.xls,.csv" hidden><b>Arrastra aquí tus Excel</b><span>o pulsa para seleccionarlos</span></label><div class="cards"></div><p class="note w" data-msg hidden></p>';
+  var drop=root.querySelector(".drop"),inp=root.querySelector("input"),cards=root.querySelector(".cards"),msg=root.querySelector("[data-msg]");
+  function say(t){msg.hidden=!t;msg.textContent=t||""}
+  function draw(){cards.innerHTML=SRC.map(function(s){var d=st[s.id];return'<div class="card'+(d?" on":"")+'"><h3>'+s.name+'</h3>'+(d?'<p class="okt">✓ '+esc(d.file)+'</p><p>'+d.recs.length+' partidos</p>':'<p>'+esc(s.hint)+'</p>')+'</div>'}).join("")}
+  function handle(files){
+    Promise.all(Array.prototype.map.call(files,function(f){return readFile(f).then(function(buf){return{name:f.name,wb:XLSX.read(buf,{type:"array"})}})})).then(function(list){
+      list.forEach(function(x){var f=detect(x.wb,x.name);if(f){st[f[0]]={file:x.name,recs:f[1].recs,markets:f[1].markets}}});
+      draw();st.onChange();
+    });
+  }
+  inp.onchange=function(){handle(inp.files);inp.value=""};
+  drop.ondragover=function(e){e.preventDefault();drop.classList.add("over")};
+  drop.ondragleave=function(){drop.classList.remove("over")};
+  drop.ondrop=function(e){e.preventDefault();drop.classList.remove("over");handle(e.dataTransfer.files)};
+  draw();return{draw:draw,say:say};
+}
+
+/* ================== VISTA PRINCIPAL ================== */
+function curEv(){return S.events.filter(function(e){return e.id===S.view})[0]||null}
+function fillSel(){
+  var s=$("evSel");s.innerHTML=S.events.map(function(e){return'<option value="'+esc(e.id)+'">'+esc(e.name)+' ('+e.matches.length+')</option>'}).join("")||'<option value="">Sin eventos</option>';
+  s.value=S.view||"";
+}
+$("evSel").onchange=function(){S.view=this.value;save();render()};
+
+function render(){
+  var ev=curEv(),list=$("list");
+  if(!ev){list.innerHTML='<div class="empty"><h2>No hay eventos</h2><p>Pulsa "Nuevo evento" para empezar.</p></div>';return}
+  $("sub0").textContent=ev.name+" · "+ev.matches.length+" partidos";
+  var cols=SRC.filter(function(s){return ev.matches.some(function(m){return m.src&&m.src[s.id]})});if(!cols.length)cols=SRC.slice(0,2);
+  var qv=norm($("q").value);
+  var html=ev.matches.filter(function(m){return !qv||norm(m.home+" "+m.away).indexOf(qv)>=0}).map(function(m,i){
+    var x=m.odds&&m.odds.x||[];
+    return'<section class="m open" data-i="'+i+'"><button class="mh" type="button"><span class="mt">'+(m.d?(m.d.split(" ")[1]||""):"")+'</span><span class="mn"><span class="nl"><span class="tc"><span class="nt">'+esc(m.home)+'</span>'+(x[0]?'<span class="hp">'+x[0]+'</span>':"")+'</span> - <span class="tc"><span class="nt">'+esc(m.away)+'</span>'+(x[2]?'<span class="hp">'+x[2]+'</span>':"")+'</span></span></span></button><div class="mb" style="display:block;padding:10px">'+
+      '<table><thead><tr><th>Mercado</th>'+cols.map(function(s){return'<th>'+s.name+'</th>'}).join("")+'</tr></thead><tbody>'+
+      MK.slice(0,4).map(function(k){return'<tr><td>'+k[1]+'</td>'+cols.map(function(s){var it=m.src&&m.src[s.id]&&m.src[s.id][k[0]]&&m.src[s.id][k[0]].items;return'<td>'+(it?it.filter(function(v){return v.b}).map(function(v){return v.l}).join(", "):"—")+'</td>'}).join("")+'</tr>'}).join("")+
+      '</tbody></table></div></section>';
+  }).join("");
+  list.innerHTML=html||'<div class="empty"><p>No hay partidos con este filtro.</p></div>';
+}
+$("q").oninput=render;
+
+/* Botones Zoom y Tema */
+updateThemeButton();
+$("themeBtn").onclick=function(){var theme=isDarkTheme()?"light":"dark";document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem(THEME_KEY,theme)}catch(e){}updateThemeButton()};
+$("zoomRange").oninput=function(){applyZoom(this.value,true)};
+$("zoomReset").onclick=function(){applyZoom(100,true)};
+
+/* Inicio */
+loadS();
+if(!curEv())S.view=S.events.length?S.events[0].id:null;
+fillSel();
+render();
+</script>
+</body>
+</html>
